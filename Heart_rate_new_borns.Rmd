@@ -1,0 +1,76 @@
+---
+title: "Heart rate in newborns"
+output:
+  html_document: default
+  pdf_document: default
+Date: 22/08/2021
+---
+## Heart rate new born 
+
+The current data analysis differences in the blood pressure rate between white and black children. The data contains three variables. The first is the patients ID which is used to anonymously identify participant. The second variable is bpm and the third variable is race which is divided into black and white. A summary of the data is provided below
+
+``` {r include=FALSE}
+knitr::opts_chunk$set(message= FALSE)
+library(ggplot2)
+library(dplyr)
+library(datasets)
+
+heart_rate_newborn <- read.csv("heart-rate-newborn.csv")
+str(heart_rate_newborn)
+summary(heart_rate_newborn)
+```
+### Cleaning data
+
+The data has been taken from a total of 364 participants. However some of the data variables need to be cleaned. The race variable is indicated as a character variables yet it is supposed to be a variables. Thus, the race variable is changed below
+
+```{r, echo=FALSE}
+heart_rate_newborn$race=as.factor(heart_rate_newborn$race)
+str(heart_rate_newborn)
+```
+
+## Exploratory analysis 
+Descriptive statistics include the mean and standard deviation was carried out to provide the overall picture of the data. 
+
+```{r, echo=FALSE}
+summary(heart_rate_newborn)
+```
+The mean beats per minute for all 364 participants was 128.5. There were a total of 151 and 213 black and white newborns. A box plot was used to show the whether there are any differences  in the mean beats per minute (bpm) between white and black children
+
+```{r, echo= FALSE}
+ggplot(data=heart_rate_newborn, aes(x=race, y=bpm),colour=race, fill =race)+
+  geom_boxplot(aes(fill=race, alpha =.5, outlier.size =0.8))+
+  labs(x="Race", y=" Beats per minute (bpm)", 
+  title = " Boxplot of Beats per minute between black and white newborns")+
+  theme_test()
+```
+ The box plot revealed that black newborns had higher beats per minute compared to white newborns. The beats per minute of white newborns was 125 while that of blacks was 133 as shown below.
+
+```{r}
+  heart_rate_newborn%>%
+  filter(race=="Black")%>%
+  summarise(mean_black=mean(bpm))
+  heart_rate_newborn%>%
+   filter(race=="White")%>%
+   summarise(mean_white= mean(bpm))
+```
+
+### Inferential statistics 
+An independent t-test was used to check whether there are significant differences in the beats per minute between white and black newborns. The data was first checked with the Shapiro Wilk test for its distribution.  Both p-values were greater than 0.05 indicating that the data was normally distributed.
+
+```{r, echo=FALSE}
+with(heart_rate_newborn, shapiro.test(bpm[race=="Black"]))
+with(heart_rate_newborn, shapiro.test(bpm[race=="White"]))
+```
+The F-test was carried out to check for homogeneity of variance as shown below. The p-value is 0.3791 which is greater than 0.05.  Thus, there is no significant difference between the two datasets. The classic t-test can therefore be used for analysis.
+
+```{r, echo=FALSE}
+f.test.results=var.test(bpm~race,data=heart_rate_newborn)
+f.test.results
+```
+
+The independent t-test was carried out to check for differences in the heart beat per minute between black and white newborns. The results revealed that there is a significant difference between the heart rate beats per minute between white and black newborns (P<0.05). 
+
+```{r, echo=FALSE}
+t.test(bpm~race, data=heart_rate_newborn, var.equal= TRUE)
+```
+
